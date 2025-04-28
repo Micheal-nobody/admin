@@ -18,7 +18,7 @@
                         placeholder="请输入密码" prefix-icon="el-icon-lock" />
                 </el-form-item>
 
-                <el-button class="login-btn" type="primary" size="large" @click.prevent="handleLogin">
+                <el-button class="login-btn" type="primary" size="large" @click="handleLogin">
                     立即登录
                 </el-button>
 
@@ -54,12 +54,13 @@ const handleLogin = () => {
         if (valid) {
             const isSuccess = await authStore.handleLogin(loginForm.value);
 
-            if (isSuccess) {
+            if (isSuccess === 200) {
                 ElMessage.success("登录成功")
                 // router.push({ name: 'home' });
             } else {
                 ElMessage.error('用户名或密码错误');
             }
+
 
 
         } else {

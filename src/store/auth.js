@@ -25,30 +25,17 @@ export const useAuthStore = defineStore('auth', {
                 for (let key in loginData) {
                     formData.append(key, loginData[key]);
                 }
-                
+
                 const response = await api.post('/login', formData);
-                console.log(response)
 
                 if (response.status === 200) {
                     api.setToken(response.data.data);
                     this.isAuthenticated = true;
-                    return true;
                 }
 
-                
-                if (response.status === 401) {
-                    //当登录失败时，清空token
-                    this.logout()
-
-
-
-                    return false;
-                }
-
-
+                return response.status;
             } catch (err) {
-                console.log(err);
-                return false;
+                return err.response.status;
             }
         },
 

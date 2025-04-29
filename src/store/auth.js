@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import api from '@/utils/axios'
 
 
-
+// 这是在测试
 //TODO: 正式使用时一定要修改isAuthenticated的初始值，否则会导致刷新页面时一直处于未登录状态
 export const useAuthStore = defineStore('auth', {
     state: () => ({

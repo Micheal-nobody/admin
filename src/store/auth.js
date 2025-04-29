@@ -27,8 +27,10 @@ export const useAuthStore = defineStore('auth', {
                 }
 
                 const response = await api.post('/login', formData);
+                console.log(response);
 
                 if (response.status === 200) {
+                    
                     api.setToken(response.data.data);
                     this.isAuthenticated = true;
                 }

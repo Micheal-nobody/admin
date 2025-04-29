@@ -56,7 +56,8 @@ const handleLogin = () => {
 
             if (isSuccess === 200) {
                 ElMessage.success("登录成功")
-                // router.push({ name: 'home' });
+                router.push({ name: 'home' });
+                
             } else {
                 ElMessage.error('用户名或密码错误');
             }

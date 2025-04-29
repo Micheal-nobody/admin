@@ -3,8 +3,9 @@ import { useAuthStore } from '@/store/auth'
 
 // 创建 Axios 实例
 const api = axios.create({
-    baseURL: "http://localhost:9090",
-    timeout: 10000,
+    baseURL: "http://localhost:9090",    // 请求的基础路径
+    timeout: 10000,                      // 请求超时时间
+    withCredentials: true               // 允许携带 cookie
 })
 
 api.setToken = (token) => {
@@ -25,6 +26,11 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
     response => response,
     error => {
+        console.log(error.response)
+        if (error.response.status === 401) { 
+            useAuthStore().logout()
+            window.location.href = '/login'
+        }
         return Promise.reject(error)
     }
 )

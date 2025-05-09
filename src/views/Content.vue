@@ -1,16 +1,22 @@
 <template>
-    <AsideComponent />
+    <el-container style="height: 100vh;">
 
-    <div class="main-container">
-        <button @click="console.log(clubStore.club)">show clubData</button>
-        <router-view />
-    </div>
+        <el-aside style="background-color: #f5f5f5;">
+            <AsideComponent />
+        </el-aside>
+
+        <el-main>
+            <router-view />
+        </el-main>
+
+    </el-container>
+
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { useFormStore } from '@/store/form';
-import { useClubStore } from '@/store/club';
+import { onMounted } from 'vue';
+import { useFormStore } from '@/store/formStore';
+import { useClubStore } from '@/store/club.ts';
 
 import AsideComponent from '@/components/Aside.vue';
 
@@ -26,13 +32,12 @@ onMounted(async () => {
     } catch (error) {
         console.log(error)
     }
-
 })
 </script>
 
 
 <style scoped>
-.aside-container {
+/* .aside-container {
     position: fixed;
     top: 0;
     left: 0;
@@ -42,9 +47,8 @@ onMounted(async () => {
 }
 
 .main-container {
-    margin-left: 15%;
     width: 85%;
     padding: 20px;
     height: 100%;
-}
+} */
 </style>

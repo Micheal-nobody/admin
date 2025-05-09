@@ -1,7 +1,6 @@
 <template>
     <div class="aside-container">
         <h3 class="sidebar-title">招新管理系统</h3>
-        <button @click="console.log(forms)"> show forms</button>
 
         <div class="scroll-wrapper">
             <el-menu :default-active="selectedIndex" @select="selected" class="custom-menu" active-text-color="#409EFF">
@@ -65,7 +64,7 @@ import { defineProps, computed } from 'vue'
 import { House, User, Bell, Setting, Plus } from '@element-plus/icons-vue'
 import { ElTag } from 'element-plus'
 import { useRouter } from 'vue-router'
-import { useFormStore } from '@/store/form'
+import { useFormStore } from '@/store/formStore'
 const formStore = useFormStore()
 const forms = computed(() => formStore.formList)
 
@@ -121,11 +120,10 @@ function addForm() {
 </script>
 
 <style scoped>
-.aside-container {
+/* .aside-container {
     background: #f8f9fa;
-    height: 100vh;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
-}
+} */
 
 .sidebar-title {
     padding: 18px 24px;
@@ -209,7 +207,8 @@ function addForm() {
 }
 
 .aside-container {
-    height: 100vh;
+    width: inherit;
+    height: inherit;
     display: flex;
     flex-direction: column;
     background: #f8f9fa;
@@ -223,6 +222,8 @@ function addForm() {
 }
 
 .scroll-wrapper {
+    width: inherit;
+    height: inherit;
     flex: 1;
     overflow-y: auto;
     scrollbar-width: thin;

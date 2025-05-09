@@ -1,56 +1,71 @@
 <template>
-
     <button @click="console.log(id)">show id</button>
     <button @click="console.log(FormData)">show FormData</button>
     <button @click="console.log(formStore.currentForm)">show currentForm</button>
     <button @click="console.log(formStore.formList)">show formList</button>
     <button @click="console.log(questions)">show Question</button>
 
-    <el-card class="Page-header">
-        <span class="section-title">增加问题：</span>
-        <el-button v-for="type in questionTypes" :key="type" class="add-question" @click="addQuestion(type)"
-            type="primary">
-            {{ typeMap[type] }}
-        </el-button>
+    <el-container>
 
-        <el-button class="save-btn" @click="saveForm" type="success">保存问卷</el-button>
-        <el-button class="delete-btn" @click="deleteForm" type="danger">删除问卷</el-button>
-    </el-card>
+        <!-- Page Header -->
+        <el-header>
+            <span class="section-title">增加问题：</span>
+            <el-button v-for="type in questionTypes" :key="type" class="add-question" @click="addQuestion(type)"
+                type="primary">
+                {{ typeMap[type] }}
+            </el-button>
 
-    <draggable :list="questions" item-key="id" @end="handleDragUpdate" handle=".drag-handle" :animation="300" ghost-class="ghost"
-        drag-class="dragging">
-
-        <template #item="{ element: question, index }">
-
-            <div class="question-item">
-
-                <!-- 问题头部 -->
-                <div class="question-header">
-                    <el-icon class="drag-handle">
-                        <Rank />
-                    </el-icon>
-
-                    <span class="question-number">
-                        {{ question.sortOrder }},
-                        {{ typeMap[question.type] }}
-                    </span>
-
-                    <el-button type="danger" @click="deleteQuestion(question.id)" :icon="Delete" circle
-                        class="remove-question-btn" />
-                </div>
+            <el-button class="save-btn" @click="saveForm" type="success">保存问卷</el-button>
+            <el-button class="delete-btn" @click="deleteForm" type="danger">删除问卷</el-button>
+        </el-header>
 
 
-                <!-- 问题主体  -->
-                <div class="question-body">
-                    <component :is="questionComponentMap[question.type]" :question="question" :index="index"
-                        @addOption="addOption" @removeOption="deleteOption">
-                    </component>
-                </div>
+        <!-- 可拖动的问题列表 -->
+        <el-main>
 
-            </div>
+            <draggable :list="questions" item-key="id" @end="handleDragUpdate" handle=".drag-handle" :animation="300"
+                ghost-class="ghost" drag-class="dragging">
 
-        </template>
-    </draggable>
+                <template #item="{ element: question, index }">
+
+                    <div class="question-item">
+
+                        <!-- 问题头部 -->
+                        <div class="question-header">
+
+                            <el-icon class="drag-handle">
+                                <Rank />
+                            </el-icon>
+
+                            <span class="question-number">
+                                {{ question.sortOrder }},
+                                {{ typeMap[question.type] }}
+                            </span>
+
+                            <el-button type="danger" @click="deleteQuestion(question.id)" :icon="Delete" circle
+                                class="remove-question-btn" />
+                        </div>
+
+
+                        <!-- 问题主体  -->
+                        <div class="question-body">
+                            <el-card>
+                                <questionHeader :fileList="fileList" />
+
+                                <component :is="questionComponentMap[question.type]" :question="question" :index="index"
+                                    @addOption="addOption" @removeOption="deleteOption">
+                                </component>
+                            </el-card>
+                        </div>
+
+                    </div>
+
+                </template>
+            </draggable>
+            
+        </el-main>
+
+    </el-container>
 
 </template>
 
@@ -61,15 +76,19 @@ import { computed } from 'vue';
 import { Plus, Close, Delete, Rank } from '@element-plus/icons-vue';
 import draggable from 'vuedraggable';
 import { useRoute } from 'vue-router';
-import { useFormStore } from '@/store/form';
+import { useFormStore } from '@/store/formStore';
+
+import questionHeader from '@/components/Form/questionHeader.vue'
+
+const fileList = ref([]);
+
 //#endregion
 
 //#region 定义样式常量
-import multipleSelect from './multipleSelect.vue';
 import openEnded from './openEnded.vue';
 import scoreProblem from './scoreProblem.vue';
-import SingleSelect from './singleSelect.vue';
 import { ElMessage } from 'element-plus';
+import OptionBody from './OptionBody.vue';
 
 const typeMap = {
     TEXT: '文本题',
@@ -79,9 +98,9 @@ const typeMap = {
 }
 const questionComponentMap = {
     TEXT: openEnded,
-    SINGLE_SELECT: SingleSelect,
-    MULTI_SELECT: multipleSelect,
-    SCORE: scoreProblem
+    SCORE: scoreProblem,
+    SINGLE_SELECT: OptionBody,
+    MULTI_SELECT: OptionBody,
 }
 
 const questionTypes = Object.keys(typeMap)
@@ -90,14 +109,19 @@ const questionTypes = Object.keys(typeMap)
 //#region 获取数据
 const formStore = useFormStore();
 const route = useRoute();
+
+//按照id更新当前表单
 const id = computed(() => Number(route.params.id))
-formStore.setCurrentFormById(id.value);
 watch(id, (newId) => {
     formStore.setCurrentFormById(newId);
 }, { immediate: true });
+formStore.setCurrentFormById(id.value);
+
 
 const FormData = computed(() => formStore.currentForm)
 const questions = computed(() => FormData.value?.questions || [])
+
+
 //#endregion
 
 //#region 处理表单操作
@@ -126,6 +150,7 @@ const deleteQuestion = (questionId) => {
 }
 
 const addOption = (question) => {
+    console.log(question)
     formStore.addOption(question)
 }
 
@@ -142,6 +167,7 @@ const handleDragUpdate = () => {
 
 
 <style scoped>
+/* #region  draggable的样式*/
 /* 被拖拽到达目标位置后的（占位符）样式 */
 .ghost {
     opacity: 0.5;
@@ -163,6 +189,8 @@ const handleDragUpdate = () => {
     -webkit-user-select: none !important;
     -moz-user-select: none;
 }
+/* #endregion */
+
 
 /* Page Header */
 .Page-header {
@@ -182,12 +210,7 @@ const handleDragUpdate = () => {
     margin-right: 20px;
 }
 
-/* wrapper*/
-.main-content {
-    width: 90%;
-    margin: 0 auto;
-}
-
+/* #region 问题列表 */
 .question-item {
     margin-bottom: 20px;
     border: 1px solid #ccc;
@@ -202,6 +225,7 @@ const handleDragUpdate = () => {
     align-items: center;
 }
 
+
 .question-number {
     font-size: 18px;
     font-weight: bold;
@@ -214,4 +238,5 @@ const handleDragUpdate = () => {
 .question-body {
     margin-top: 10px;
 }
+/* #endregion */
 </style>

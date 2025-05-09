@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
+import { ElMessage } from 'element-plus'
 
 
 
@@ -20,13 +21,12 @@ const routes = [
         meta: { requiresAuth: true },
         children: [
             {
-                path: "",
+                path: "", // 匹配 /content
                 name: "content",
-                //! 我也不知道为什么，但就是用不了相对路径，只能用绝对路径
-                redirect: "/content/Home",
+                redirect: { name: "home" } // 使用命名路由确保准确性
             },
             {
-                path: "Home",
+                path: "Home", // 相对路径，实际路径为 /content/home
                 name: "home",
                 component: () => import("@/components/Home.vue"),
             },
@@ -54,21 +54,29 @@ const router = createRouter({ history: createWebHistory(), routes })
 // 全局前置守卫
 //TODO: 这里的路由守卫还需要完善，比如验证本地token是否有效（也就是是否登录）
 router.beforeEach((to, from, next) => {
-    console.log('全局前置守卫')
-    // 登录验证
-    if (to.meta.requiresAuth) {
-        const authStore = useAuthStore()
+    const authStore = useAuthStore()
 
-        if (authStore.isAuthenticated) {
-            next()
-        } else {
-            console.log('未登录，跳转到登录页面')
-            next({ name: 'login' })
-        }
-    }
-    else {
-        next()
-    }
+    //TODO:测试阶段，先注释掉
+    next()
+
+    // //如果没有登录，则尝试获取本地token
+    // if (!authStore.isAuthenticated) {
+    //     authStore.getAuthenticated();
+    // }
+
+
+    // // 登录验证
+    // if (to.meta.requiresAuth) {
+    //     if (authStore.isAuthenticated) {
+    //         next()
+    //     } else {
+    //         ElMessage.error('请先登录')
+    //         next({ name: 'login' })
+    //     }
+    // }
+    // else {
+    //     next()
+    // }
 })
 
 //导出路由实例

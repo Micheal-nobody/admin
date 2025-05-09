@@ -6,6 +6,10 @@ export default function useForm() {
         username: '',  
         password: ''
     });
+    
+    // const loginForm = new FormData();
+    // loginForm.append('username', '');
+    // loginForm.append('password', '');
 
     // 定义校验规则
     const rules = ref({

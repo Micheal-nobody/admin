@@ -1,5 +1,7 @@
 <template>
 
+<button @click="console.log(authStore.getLocalToken())">show localToken</button>
+
     <div class="login-container">
         <div class="login-box">
             <div class="login-header">
@@ -36,19 +38,20 @@
 //#region 导入依赖
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
-import api from '@/utils/axios';
 
 import useLoginForm from '@/Composable/useLoginForm';
 import { useAuthStore } from '@/store/auth';
 import router from '@/router';
-const authStore = useAuthStore();
-const { loginForm, rules } = useLoginForm();
+
 const loginFormRef = ref(null);
+const { loginForm, rules } = useLoginForm();
+
 //#endregion
 
 
 // 登录处理方法
 // !目前只设置了登陆成功的提示信息，后续可以增加更多的功能
+const authStore = useAuthStore();
 const handleLogin = () => {
     loginFormRef.value.validate(async (valid) => {
         if (valid) {
@@ -57,12 +60,10 @@ const handleLogin = () => {
             if (isSuccess === 200) {
                 ElMessage.success("登录成功")
                 router.push({ name: 'home' });
-                
+
             } else {
                 ElMessage.error('用户名或密码错误');
             }
-
-
 
         } else {
             console.log('登录失败');

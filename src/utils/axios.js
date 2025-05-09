@@ -5,17 +5,15 @@ import { useAuthStore } from '@/store/auth'
 const api = axios.create({
     baseURL: "http://localhost:9090",    // 请求的基础路径
     timeout: 10000,                      // 请求超时时间
-    withCredentials: true               // 允许携带 cookie
+    withCredentials: false               // 允许携带 cookie
 })
 
-api.setToken = (token) => {
-    useAuthStore().setToken(token)
-    api.defaults.headers.common['token'] = `${token}`
-}
 
 // 请求拦截器：自动添加 Token
 api.interceptors.request.use(config => {
-    const { token } = useAuthStore();
+    // const { token } = useAuthStore();
+    const token = "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VySWQiOjMzLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXX0.69BERPx7FuKyLl6NkfBTE5CZZFMlQWHwFgpjAORCPlQms5uRwdtS_tmUnCBR-aVbJjtFAQLsJ01IeDGYhMkNFg"
+
     if (token) {
         config.headers.token = `${token}`
     }

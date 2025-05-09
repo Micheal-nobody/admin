@@ -1,116 +1,133 @@
 <template>
 
-    <button @click="console.log(fileList)">show fileList</button>
+    <button @click="console.log(content)">show content</button>
+    <div class="rich-editor">
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <el-button @click="insertImage">插入图片</el-button>
+            <el-button @click="insertButton">插入按钮</el-button>
+            <el-upload action="/api/upload" :show-file-list="false" :on-success="handleUploadSuccess">
+                <el-button type="primary">上传图片</el-button>
+            </el-upload>
+        </div>
 
-    <el-upload class="upload-demo" action="http://localhost:9090/api/file/test" v-model:file-list="fileList"
-        :multiple="true" :show-file-list="false" list-type="picture" :limit="3" :before-upload="beforeUpload"
-        :on-success="onSuccess" :on-error="onError">
-
-        <el-button type="primary">点击上传图片</el-button>
-
-    </el-upload>
-
-    <!-- 可拖动预览 -->
-    <draggable v-model="fileList" group="people" @end="handleDragEnd" item-key="uid" handle=".drag-handle"
-        class="drag-container" animation="300">
-        <template #item="{ element: picture, index }">
-            <div class="drag-item" :key="picture.uid">
-                <el-card class="drag-card">
-                    <img :src="picture.url" alt="Picture" style="width: 100%" />
-                </el-card>
-                <div class="drag-handle">
-                    <el-icon>
-                        <More />
-                    </el-icon>
-                </div>
-            </div>
-        </template>
-    </draggable>
-
-
-
-    <el-dialog v-model="dialogVisible">
-        <img w-full :src="dialogImageUrl" alt="Preview" />
-    </el-dialog>
+        <!-- 可编辑区域 -->
+        <div ref="editor" class="editor-content" contenteditable="true" @input="handleInput" @paste="handlePaste"
+            @keydown.enter="handleEnter"></div>
+        
+    </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import draggable from 'vuedraggable'
-import { Rank, More } from '@element-plus/icons-vue'
+import { ref } from 'vue';
+
+const editor = ref(null);
+const content = ref('');
+
+// 处理文本输入
+const handleInput = () => {
+    content.value = editor.value.innerHTML;
+};
+
+// 插入图片
+const insertImage = (url) => {
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.maxWidth = '200px';
+    img.style.maxHeight = '150px';
+    range.insertNode(img);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+};
 
 
-const dialogVisible = ref(false)
-const dialogImageUrl = ref('')
 
-const fileList = ref([])
+// 插入按钮
+const insertButton = () => {
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    const button = document.createElement('button');
+    button.className = 'el-button el-button--primary';
+    button.contentEditable = 'false';
+    button.textContent = '按钮';
+    range.insertNode(button);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+};
 
-const beforeUpload = (file) => {
-    const isJPG = file.type === 'image/jpeg'
-    const isLt2M = file.size / 1024 / 1024 < 2
-    if (!isJPG) {
-        console.log('You can only upload JPG file!')
+// 处理图片上传成功
+const handleUploadSuccess = (response) => {
+    insertImage(response.url);
+};
+
+// 处理粘贴事件
+const handlePaste = (e) => {
+    const items = e.clipboardData.items;
+    for (const item of items) {
+        if (item.type.indexOf('image') !== -1) {
+            const blob = item.getAsFile();
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                insertImage(event.target.result);
+            };
+            reader.readAsDataURL(blob);
+            e.preventDefault();
+            return;
+        }
     }
-    if (!isLt2M) {
-        console.log('Image must smaller than 2MB!')
-    }
-    return isJPG && isLt2M
-}
+};
 
-const onSuccess = (res, file) => {
-    const index = fileList.value.findIndex(f => f.uid === file.uid);
-    if (index !== -1) {
-        file.sortOrder = index + 1;
-    }
+// 处理回车键
+const handleEnter = (e) => {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
 
-    console.log("success!")
-}
+    const range = selection.getRangeAt(0);
+    const br = document.createElement('br');
+    range.deleteContents();
+    range.insertNode(br);
+    range.setStartAfter(br);
+    range.collapse(true);
 
-const onError = (err, file) => {
-    console.log("error!")
-}
-
-const handleDragEnd = () => {
-    fileList.value.forEach((file, index) => {
-        file.sortOrder = index + 1
-    })
-}
-
-
-
+    selection.removeAllRanges();
+    selection.addRange(range);
+    e.preventDefault();
+};
 </script>
 
 <style scoped>
-.upload-demo {
-    width: 100%;
-}
-
-
-.drag-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.drag-item {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.drag-card {
-    width: 100px;
-    height: 100px;
-    padding: 0;
-    border: 1px solid #ccc;
+.rich-editor {
+    border: 1px solid #dcdfe6;
     border-radius: 4px;
-    cursor: move;
+    padding: 5px;
 }
 
-.drag-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.toolbar {
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.editor-content {
+    min-height: 100px;
+    padding: 10px;
+    outline: none;
+    overflow-y: auto;
+}
+
+.editor-content:focus {
+    border-color: #409eff;
+}
+
+.editor-content img {
+    vertical-align: middle;
+    margin: 2px;
+}
+
+.editor-content button {
+    margin: 2px;
 }
 </style>

@@ -1,27 +1,29 @@
 <!-- 显示一个社团的信息 -->
 <template>
 
-  <button @click="console.log(clubData)">show club</button>
-  
-  <h1>社团信息页</h1>
-  <h1 style="color: red;">TODO:修改功能</h1>
-  <!-- 第一部分，显示logo和社团名称 -->
-  <header>
-    <img :src="clubData.coverImage" alt="社团logo">
-    <span>{{ clubData.name }}</span>
-  </header>
+  <el-container>
+    <button @click="console.log(clubData)">show club</button>
 
-  <!-- 第二部分，显示社团信息 -->
-  <div>
-    <p>社团简介：{{ clubData.description }}</p>
-    <p>社团电话：{{ clubData.coverImage }}</p>
-  </div>
+    <el-header>
+
+      <h1>社团信息页</h1>
+      <h1 style="color: red;">TODO:修改功能</h1>
+      <img :src="clubData?.coverImage" alt="社团logo">
+      <span>{{ clubData?.name }}</span>
+    </el-header>
+
+    <el-main>
+      <p>社团简介：{{ clubData?.description }}</p>
+      <p>社团电话：{{ clubData?.coverImage }}</p>
+    </el-main>
+  </el-container>
 
 </template>
 
 <script setup>
 // 引入全局变量
-import { computed } from 'vue'
+
+import { computed, onMounted } from 'vue'
 import { useClubStore } from '@/store/club'
 
 const clubStore = useClubStore()

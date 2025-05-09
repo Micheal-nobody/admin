@@ -1,19 +1,12 @@
 <template>
+
+    <!-- 打分区间 -->
     <div class="main-content">
-        <!-- 问题列表 -->
-        <el-card class="question-item" shadow="hover">
-
-            <el-input v-model="question.title" placeholder="请输入问题" class="question-title" />
-
-            <!-- 问题内容 -->
-            <div class="question-body">
-                <!-- 打分区间 -->
-                <div class="score-range">
-                    <el-slider v-model="question.score" :min="0" :max="10" :step="0.1" show-input></el-slider>
-                </div>
-            </div>
-        </el-card>
+        <div class="score-range">
+            <el-slider v-model="question.score" :min="0" :max="10" :step="0.1" show-input></el-slider>
+        </div>
     </div>
+
 </template>
 
 <script setup>
@@ -30,8 +23,6 @@ const props = defineProps({
         required: true
     }
 })
-
-const question = toRef(props.question)
 </script>
 
 <style scoped>
@@ -41,9 +32,6 @@ const question = toRef(props.question)
     width: 100%;
 }
 
-.question-item {
-    margin-bottom: 20px;
-}
 
 .question-header {
     display: flex;

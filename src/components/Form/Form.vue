@@ -1,9 +1,14 @@
 <template>
-    <button @click="console.log(id)">show id</button>
-    <button @click="console.log(FormData)">show FormData</button>
-    <button @click="console.log(formStore.currentForm)">show currentForm</button>
-    <button @click="console.log(formStore.formList)">show formList</button>
-    <button @click="console.log(questions)">show Question</button>
+    <!-- debug区域，记得删掉 -->
+    <div
+        style="background-color: #f5f5f5;padding: 10px;margin-bottom: 10px; display: flex; justify-content: space-between;align-items: center;">
+        <button @click="console.log(id)">show id</button>
+        <!-- <button @click="console.log(FormData)">show FormData</button> -->
+        <button @click="showFormData()">show FormData</button>
+        <button @click="console.log(formStore.currentForm.questions[1].options)">show currentForm</button>
+        <button @click="console.log(formStore.formList)">show formList</button>
+        <button @click="console.log(questions)">show Question</button>
+    </div>
 
     <el-container>
 
@@ -26,22 +31,25 @@
             <draggable :list="questions" item-key="id" @end="handleDragUpdate" handle=".drag-handle" :animation="300"
                 ghost-class="ghost" drag-class="dragging">
 
-                <template #item="{ element: question, index }">
+                <template #item="{ element: question }">
 
                     <div class="question-item">
 
-                        <!-- 问题头部 -->
+                        <!-- 问题头部-->
                         <div class="question-header">
 
+                            <!-- 拖动按钮 -->
                             <el-icon class="drag-handle">
                                 <Rank />
                             </el-icon>
 
+                            <!-- 问题序号 -->
                             <span class="question-number">
-                                {{ question.sortOrder }},
+                                {{ question.sortOrder + 1 }},
                                 {{ typeMap[question.type] }}
                             </span>
 
+                            <!-- 删除问题按钮 -->
                             <el-button type="danger" @click="deleteQuestion(question.id)" :icon="Delete" circle
                                 class="remove-question-btn" />
                         </div>
@@ -50,19 +58,21 @@
                         <!-- 问题主体  -->
                         <div class="question-body">
                             <el-card>
-                                <questionHeader :fileList="fileList" />
+                                <!-- 问题内容，就是你问的是个啥？ -->
+                                <questionHeader :question="question" />
 
-                                <component :is="questionComponentMap[question.type]" :question="question" :index="index"
+                                <!-- 用户答题部分，根据问题类型不同，显示不同的组件，比如选择题显示选项，评分题显示分数等 -->
+                                <component :is="questionComponentMap[question.type]" :question="question"
                                     @addOption="addOption" @removeOption="deleteOption">
                                 </component>
+
                             </el-card>
                         </div>
-
                     </div>
 
                 </template>
             </draggable>
-            
+
         </el-main>
 
     </el-container>
@@ -79,9 +89,6 @@ import { useRoute } from 'vue-router';
 import { useFormStore } from '@/store/formStore';
 
 import questionHeader from '@/components/Form/questionHeader.vue'
-
-const fileList = ref([]);
-
 //#endregion
 
 //#region 定义样式常量
@@ -110,12 +117,11 @@ const questionTypes = Object.keys(typeMap)
 const formStore = useFormStore();
 const route = useRoute();
 
-//按照id更新当前表单
+//从路由参数中接受id，并更新当前表单
 const id = computed(() => Number(route.params.id))
 watch(id, (newId) => {
     formStore.setCurrentFormById(newId);
 }, { immediate: true });
-formStore.setCurrentFormById(id.value);
 
 
 const FormData = computed(() => formStore.currentForm)
@@ -141,7 +147,7 @@ const deleteForm = () => {
 //#region 处理问题操作
 
 const addQuestion = (type) => {
-    formStore.addQuestion(id.value, type)
+    formStore.addQuestion(type)
 }
 
 // 删除问题
@@ -150,7 +156,6 @@ const deleteQuestion = (questionId) => {
 }
 
 const addOption = (question) => {
-    console.log(question)
     formStore.addOption(question)
 }
 
@@ -163,6 +168,16 @@ const deleteOption = (question, optionId) => {
 const handleDragUpdate = () => {
     formStore.updateQuestionSortOrder();
 };
+
+
+
+
+
+
+//debug区域，记得删掉
+const showFormData = () => {
+    console.log(FormData.value)
+}
 </script>
 
 
@@ -182,24 +197,19 @@ const handleDragUpdate = () => {
     border: 2px dashed #1e90ff;
 }
 
+/* 拖拽把手的样式 */
 .drag-handle {
-    cursor: move;
+    cursor: pointer;
     margin-right: 8px;
     user-select: none !important;
     -webkit-user-select: none !important;
     -moz-user-select: none;
 }
+
 /* #endregion */
 
 
 /* Page Header */
-.Page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
 .section-title {
     font-size: 24px;
     font-weight: bold;
@@ -225,18 +235,9 @@ const handleDragUpdate = () => {
     align-items: center;
 }
 
-
-.question-number {
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.remove-question-btn {
-    margin-left: 10px;
-}
-
 .question-body {
     margin-top: 10px;
 }
+
 /* #endregion */
 </style>

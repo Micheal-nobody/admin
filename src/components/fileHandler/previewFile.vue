@@ -1,21 +1,22 @@
 <template>
 
     <!-- 可拖动预览 -->
-    <draggable v-model="props.fileList.value" @end="handleDragEnd" item-key="uid" handle=".drag-handle"
-        class="drag-container" animation="300">
+     <!-- <button @click="showfileList()">show previewList</button>
+     <button @click="showfileData()">show fileData</button> -->
+    <draggable v-model="fileList" @end="handleDragEnd" item-key="id" handle=".drag-handle" class="drag-container"
+        animation="300">
+        <template #item="{ element: picture }">
 
-        <template #item="{ element: picture, index }">
             <div class="drag-item" :key="picture.uid">
                 <el-card class="drag-card" @click="handlePreview(picture.url)" shadow="hover" body-style="padding: 0">
-                    <img :src="picture.url" alt="Picture"  />
+                    <img :src="picture.url" alt="Picture" />
                 </el-card>
 
-                <div class="drag-handle">
-                    <el-icon>
-                        <Rank />
-                    </el-icon>
-                </div>
+                <el-icon class="handle" style="cursor:pointer;">
+                    <MoreFilled />
+                </el-icon>
             </div>
+
         </template>
     </draggable>
 
@@ -25,24 +26,20 @@
     </el-dialog>
 </template>
 
-<script setup>
-import { ref, toRef, defineProps } from 'vue'
+<script setup lang="ts">
+import { ref, toRef, defineProps, PropType,onMounted } from 'vue'
 import draggable from 'vuedraggable'
-import { Rank, More } from '@element-plus/icons-vue'
+import { MoreFilled } from '@element-plus/icons-vue'
+import { File } from '@/models/form'
 
 
+
+//#region 预览部分
 const dialogVisible = ref(false)
 const dialogImageUrl = ref('')
 
-const props = defineProps({
-    fileList: {
-        type: Array,
-        default: () => []
-    }
-})
-
 const handleDragEnd = () => {
-    props.fileList.value.forEach((file, index) => {
+    fileList.value.forEach((file, index) => {
         file.sortOrder = index + 1
     })
 }
@@ -51,6 +48,45 @@ const handlePreview = (url) => {
     dialogImageUrl.value = url
     dialogVisible.value = true
 }
+//#endregion
+
+const props = defineProps({
+    fileList: {
+        type: Array as PropType<File[]>,
+        required: true
+    }
+})
+const fileList = toRef(props, 'fileList')
+
+const showfileList = () => {
+    console.log(fileList.value)
+}
+const showfileData = () => {
+    console.log(fileList[0].fileData)
+}
+
+//挂载时，将base64格式的图片转为blob格式
+onMounted(() => {
+    fileList.value.forEach((file) => {
+        const { fileData } = file;
+        if (fileData && typeof fileData === "string") {
+            // 处理base64格式图片
+            const binaryData = atob(fileData);
+            const arrayBuffer = new ArrayBuffer(binaryData.length);
+            const uint8Array = new Uint8Array(arrayBuffer);
+            for (let i = 0; i < binaryData.length; i++) {
+                uint8Array[i] = binaryData.charCodeAt(i);
+            }
+
+            // 转为blob格式
+            file.fileData = new Blob([uint8Array], { type: file.mimeType });
+
+            //添加url属性
+            file.url = URL.createObjectURL(file.fileData);
+        }
+        return file;
+    });
+});
 </script>
 
 <style scoped>
@@ -81,5 +117,4 @@ const handlePreview = (url) => {
     height: 100%;
     object-fit: cover;
 }
-
 </style>

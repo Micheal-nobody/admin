@@ -34,21 +34,3 @@ onMounted(async () => {
     }
 })
 </script>
-
-
-<style scoped>
-/* .aside-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 15%;
-    height: 100%;
-    background-color: #f5f5f5;
-}
-
-.main-container {
-    width: 85%;
-    padding: 20px;
-    height: 100%;
-} */
-</style>

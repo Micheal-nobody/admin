@@ -3,13 +3,29 @@
     <!-- 选项内容 -->
     <div class="option-container">
 
-        <div v-for="(option, optIndex) in question.options" :key="optIndex" class="option-item">
-            <el-input v-model="option.value" placeholder="选项" class="option-input" />
+        <draggable :list="question.options" handle=".handle" animation=200 item-key="id">
+            <template #item="{ element: option }">
+                <div class="option-item">
+                    <div class="option-item-content">
 
-            <upload-component :file-list="fileList" />
-            <el-button v-if="question.options.length > 1" @click="removeOption(option.id)" :icon="Delete"
-                type="danger" />
-        </div>
+                        <!-- 旋转icon的方向 -->
+                        <el-icon class="handle" style="cursor: move; color: #666;transform: rotate(90deg); ">
+                            <MoreFilled />
+                        </el-icon>
+
+                        <el-input v-model="option.optionText" placeholder="这是一个选项" class="option-input" />
+
+                        <upload-component :file-list="option.optionAttachments" type="option" :id="option.id" />
+                        <el-button v-if="question.options.length > 1" @click="removeOption(option.id)" :icon="Delete"
+                            type="danger" />
+                    </div>
+
+                    <div class="preview-file-container">
+                        <preview-file :file-list="option.optionAttachments" />
+                    </div>
+                </div>
+            </template>
+        </draggable>
 
 
         <el-button type="primary" @click="addOption" :icon="Plus" class="add-option">
@@ -19,26 +35,24 @@
 
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, toRef } from 'vue'
 import { defineProps, defineEmits, watch } from 'vue'
-import { Delete, Close, Plus } from '@element-plus/icons-vue'
-
+import { Delete, Close, Plus, MoreFilled } from '@element-plus/icons-vue'
+import draggable from 'vuedraggable';
 import uploadComponent from '@/components/fileHandler/uploadFile.vue'
-const fileList = ref([])
+import previewFile from '@/components/fileHandler/previewFile.vue'
+
+//引入Option接口
+import type { Question } from '@/models/form'
 
 const emit = defineEmits(['addOption', 'removeOption'])
 const props = defineProps({
     question: {
-        type: Object,
-        required: true
-    },
-    index: {
-        type: Number,
+        type: Object as () => Question,
         required: true
     }
 })
-
 const question = toRef(props, 'question')
 
 const addOption = () => {
@@ -57,7 +71,18 @@ const removeOption = (optionId) => {
 
 .option-item {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     margin-bottom: 10px;
+}
+
+.option-item-content {
+    display: flex;
+    align-items: center;
+}
+
+.preview-file-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
 }
 </style>

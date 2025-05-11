@@ -4,29 +4,39 @@
 
         <div class="input-container">
             <el-input placeholder="请输入问题" class="question-title" />
-            <uploadComponent :file-list="fileList" />
+            <!-- 直接传入正确的type名字：question -->
+            <uploadComponent :file-list="question.questionAttachments" type="question" :id="question.id" />
         </div>
-        <showImagesComponent :file-list="fileList" />
+        <showImagesComponent :file-list="question.questionAttachments" />
 
     </div>
-
 </template>
 
-<script setup>
-import { ref, toRef } from 'vue'
+<script setup lang="ts">
+import { ref, toRef, computed, PropType } from 'vue'
 import { defineProps, defineEmits, watch } from 'vue'
 
 import uploadComponent from '@/components/fileHandler/uploadFile.vue'
 import showImagesComponent from '@/components/fileHandler/previewFile.vue'
 
+//这是我自定义的File类型
+import { File, Question } from '@/models/form'
 
 // 接受父组件传值
 const props = defineProps({
-    fileList: {
-        type: Array,
-        default: () => []
-    }
+    question: {
+        type: Object as PropType<Question>,
+        required: true,
+    },
 })
+
+
+const question = toRef(props, 'question')
+
+const showFileList = () => {
+    console.log(question.value.questionAttachments)
+}
+
 
 
 // // 图片，文件上传成功后的处理函数
